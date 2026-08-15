@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import time
 from sklearn.ensemble import IsolationForest
 import plotly.express as px
 
@@ -47,25 +48,42 @@ def run_model():
 
 df_sonuc = run_model()
 
-# 3. KONTROL PANELİ METRİKLERİ
-st.subheader("Anlık Sistem Durumu (Son Veri Noktası)")
-col1, col2, col3 = st.columns(3)
-son_durum = df_sonuc.iloc[-1]
+# 3. CANLI AKIŞ (SCADA SİMÜLASYONU) EKRANI 
+st.title("🏭 Reaktör Erken Uyarı Sistemi (Canlı Akış)")
+st.write("Bu panel, reaktördeki basınç ve sıcaklık verilerini saniye saniye okuyarak anomali tespiti yapar.")
 
-col1.metric("Son Basınç", f"{son_durum['Reaktor_Basinci']:.0f} kPa", "Kritik Seviye", delta_color="inverse")
-col2.metric("Son Sıcaklık", f"{son_durum['Reaktor_Sicakligi']:.1f} °C", "Artış Trendi", delta_color="inverse")
+# Ekranı canlı güncellemek için boş bir kutu (placeholder) oluşturuyoruz
+placeholder = st.empty()
 
-if son_durum['Durum'] == 'Normal':
-    col3.success("Sistem Durumu: NORMAL")
-else:
-    col3.error("Sistem Durumu: ANOMALİ TESPİT EDİLDİ!")
-
-# 4. GRAFİK (PLOTLY)
-st.subheader("Sensör Verisi ve Yapay Zeka Analizi")
-fig = px.scatter(
-    df_sonuc, x=df_sonuc.index, y='Reaktor_Basinci', color='Durum',
-    color_discrete_map={'Normal': '#00b4d8', 'Anomali (Tehlike)': '#d00000'},
-    labels={'index': 'Zaman (Dakika)', 'Reaktor_Basinci': 'Basınç (kPa)'}
-)
-fig.add_vline(x=200, line_dash="dash", line_color="green", annotation_text="Arıza Başlangıcı")
-st.plotly_chart(fig, use_container_width=True)
+# Veriyi sanki saniye saniye okuyormuşuz gibi bir döngüye sokuyoruz
+for saniye in range(10, len(df_sonuc), 5): # 5'er 5'er atlayarak hızlı bir animasyon yapar
+    
+    # O anki saniyeye kadar olan veriyi kesip alıyoruz
+    df_anlik = df_sonuc.iloc[:saniye]
+    son_durum = df_anlik.iloc[-1]
+    
+    # Tüm ekranı 'placeholder' içine çizdiriyoruz ki sürekli yenilensin
+    with placeholder.container():
+        st.subheader("Anlık Sistem Durumu")
+        col1, col2, col3 = st.columns(3)
+        
+        col1.metric("Son Basınç", f"{son_durum['Reaktor_Basinci']:.0f} kPa", delta_color="inverse")
+        col2.metric("Son Sıcaklık", f"{son_durum['Reaktor_Sicakligi']:.1f} °C", delta_color="inverse")
+        
+        if son_durum['Durum'] == 'Normal':
+            col3.success("Sistem Durumu: NORMAL")
+        else:
+            col3.error("Sistem Durumu: ANOMALİ TESPİT EDİLDİ!")
+            
+        # Canlı güncellenen grafik
+        fig = px.scatter(
+            df_anlik, x=df_anlik.index, y='Reaktor_Basinci', color='Durum',
+            color_discrete_map={'Normal': '#00b4d8', 'Anomali (Tehlike)': '#d00000'},
+            labels={'index': 'Zaman (Dakika)', 'Reaktor_Basinci': 'Basınç (kPa)'},
+            range_x=[0, 500], range_y=[2650, 3250] # Eksenleri sabitliyoruz ki grafik titremesin
+        )
+        fig.add_vline(x=200, line_dash="dash", line_color="green", annotation_text="Arıza Başlangıcı")
+        st.plotly_chart(fig, use_container_width=True)
+        
+    # Her güncelemeden sonra 0.1 saniye bekle (Gerçek zamanlı animasyon hissi)
+    time.sleep(0.1)
