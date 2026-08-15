@@ -2,7 +2,7 @@
 
 Bu proje, kimya ve petrokimya endüstrisinde sıkça karşılaşılan ekzotermik reaktör arızalarını (özellikle soğutma suyu kesintisi kaynaklı termal kaçak risklerini) önceden tespit etmek amacıyla geliştirilmiş bir **Kestirimci Bakım (Predictive Maintenance)** ve **Makine Öğrenmesi** uygulamasıdır.
 
-**Canlı Uygulamayı Test Etmek İçin Tıklayın** * [[[http://localhost:8501](http://localhost:8501)](https://reaktor-erken-uyari-sistemi.streamlit.app)] *
+**Canlı Uygulamayı Test Etmek İçin Tıklayın** * [(https://reaktor-erken-uyari-sistemi.streamlit.app)] *
 
 ## Projenin Amacı ve Çözdüğü Problem
 Endüstriyel tesislerde (örneğin polimerizasyon reaktörleri), soğutma sistemlerindeki bir arıza, reaktör içinde **Termal Kaçak (Thermal Runaway)** adı verilen sapmalara ve yüksek basınç patlamalarına yol açabilir. Klasik sistemler, sadece sıcaklık veya basınç kritik seviyeye ulaştığında alarm verir; bu da müdahale için çoğu zaman çok geçtir.
